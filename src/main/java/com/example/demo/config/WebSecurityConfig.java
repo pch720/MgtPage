@@ -16,22 +16,18 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/", "/home").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger 경로 허용
-                                .anyRequest().authenticated()
-                )
-                .formLogin(formLogin ->
-                        formLogin
-                                .loginPage("/login")
-                                .permitAll()
-                )
-                .logout(logout ->
-                        logout
-                                .permitAll()
-                );
-
+            .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                .requestMatchers("/", "/login**", "/error").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger 경로 허용
+                .anyRequest().authenticated()
+            )
+            .oauth2Login(oauth2Login -> oauth2Login
+                    .loginPage("/login")
+                    .defaultSuccessUrl("/home", true)
+                    .authorizationEndpoint(authorizationEndpoint ->
+                            authorizationEndpoint.baseUri("/githubAuth")
+                    )
+            );
         return http.build();
     }
 
